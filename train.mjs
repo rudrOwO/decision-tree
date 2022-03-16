@@ -1,8 +1,8 @@
-import dataSet from './data.mjs';
-import Node from './node.mjs';
+import dataSet from "./data.mjs";
+import Node from "./node.mjs";
 
 // calulating root entropy
 
-
 // training
-const root = new Node(1, dataSet);
+const root = new Node(1, dataSet, 2);
+console.log(root.calcEntropy());
