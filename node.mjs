@@ -1,4 +1,4 @@
-const featureLimit = 7;
+const featureLimit = 3; // testing features indexed from 1 to limit; breaking condition for recursion
 const splitCount = 5;
 const splitCombinations = [];
 
@@ -10,7 +10,7 @@ for (let i = 1; i < splitCount; ++i) {
 }
 
 export default class Node {
-    constructor (featureIndex, wineList) {
+    constructor (featureIndex, wineList, classifierID) {
         let featureValue = {
             min: Infinity,
             max: -Infinity
@@ -23,6 +23,7 @@ export default class Node {
         
         const unitDistance = (featureValue.max - featureValue.min) / splitCount;
         
+        this.classifierID = classifierID; 
         this.wineList = wineList;
         this.featureIndex = featureIndex;
         this.splits = splitCombinations.map(
@@ -34,7 +35,21 @@ export default class Node {
     }    
     
     calcOptimumSplit() {
-        
+        this.splits.forEach(currentSplit => {
+            const wineForChildren = {
+                left: [],
+                middle: [],
+                right: []
+            };
+            
+            wineForChildren.left = this.wineList.filter(wine => wine[this.featureIndex] <= currentSplit.lowerBound);
+            wineForChildren.middle = this.wineList.filter( wine => 
+                wine[this.featureIndex] > currentSplit.lowerBound && wine[this.featureIndex] <= currentSplit.upperBound
+            );
+            wineForChildren.right = this.wineList.filter(wine => wine[this.featureIndex] > currentSplit.upperBound);
+            
+            // make new nodes and compare entropies
+        })
     }
     
     calcEntropy() {
