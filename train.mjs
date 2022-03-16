@@ -1,7 +1,7 @@
 import data from './data.mjs';
 import Node from './node.mjs';
 
-const featureLimit = 13;
+const featureLimit = 7;
 const nodeArray = [];
 
 // feature engineering 
