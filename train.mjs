@@ -1,8 +1,6 @@
 import dataSet from "./data.mjs";
 import Node from "./node.mjs";
 
-// calulating root entropy
-
-// training
-const root = new Node(1, dataSet, 2);
-console.log(root.calcEntropy());
+const test = new Node(1, dataSet, 1);
+test.getOptimumDecision();
+console.log(test.entropy);

@@ -1,86 +1,81 @@
-const featureLimit = 3; // testing features indexed from 1 to limit; breaking condition for recursion
+const maxDepth = 3; // testing features indexed from 1 to limit; breaking condition for recursion
 const splitCount = 5;
 const splitCombinations = [];
 
 // generate nC2 splits
 for (let i = 1; i < splitCount; ++i) {
-	for (let j = i + 1; j < splitCount; ++j) {
-		splitCombinations.push([i, j]);
-	}
+    for (let j = i + 1; j < splitCount; ++j) splitCombinations.push([i, j]);
 }
 
 export default class Node {
-	constructor(featureIndex, wineList, classifierID) {
-		let featureValue = {
-			min: Infinity,
-			max: -Infinity,
-		};
+    constructor(decisionIndex, wineList, depth) {
+        let featureValue = {
+            min: Infinity,
+            max: -Infinity,
+        };
 
-		wineList.forEach((wine) => {
-			featureValue.min = Math.min(featureValue.min, wine[featureIndex]);
-			featureValue.max = Math.max(featureValue.max, wine[featureIndex]);
-		});
+        wineList.forEach(wine => {
+            featureValue.min = Math.min(featureValue.min, wine[decisionIndex]);
+            featureValue.max = Math.max(featureValue.max, wine[decisionIndex]);
+        });
 
-		const unitDistance = (featureValue.max - featureValue.min) / splitCount;
+        const unitDistance = (featureValue.max - featureValue.min) / splitCount;
 
-		this.classifierID = classifierID;
-		this.wineList = wineList;
-		this.featureIndex = featureIndex;
-		this.splits = splitCombinations.map((pair) => ({
-			lowerBound: featureValue.min + pair[0] * unitDistance,
-			upperBound: featureValue.min + pair[1] * unitDistance,
-		}));
-		this.children = { left: null, middle: null, right: null };
-	}
+        this.depth = depth;
+        this.wineList = wineList;
+        this.decisionIndex = decisionIndex;
+        this.splits = splitCombinations.map(pair => ({
+            lowerBound: featureValue.min + pair[0] * unitDistance,
+            upperBound: featureValue.min + pair[1] * unitDistance,
+        }));
+        this.children = new Array(4);
+    }
 
-	calcOptimumSplit() {
-		if (this.featureIndex === featureLimit) return this.calcEntropy();
+    getOptimumDecision() {
+        // Breaking condition
+        if (this.depth === maxDepth) return this.calcWeightedEntropy();
 
-		this.splits.forEach((currentSplit) => {
-			const wineForChildren = {
-				left: [],
-				middle: [],
-				right: [],
-			};
+        this.entropy = Infinity;
 
-			wineForChildren.left = this.wineList.filter(
-				(wine) => wine[this.featureIndex] <= currentSplit.lowerBound
-			);
-			wineForChildren.middle = this.wineList.filter(
-				(wine) =>
-					wine[this.featureIndex] > currentSplit.lowerBound &&
-					wine[this.featureIndex] <= currentSplit.upperBound
-			);
-			wineForChildren.right = this.wineList.filter(
-				(wine) => wine[this.featureIndex] > currentSplit.upperBound
-			);
+        // Iterating through the splits
+        this.splits.forEach(currentSplit => {
+            const wineForChildren = new Array(4);
 
-			// make new nodes and compare entropies
-			this.children.left = new Node(
-				this.featureIndex + 1,
-				wineForChildren.left,
-				1
-			);
-			this.children.middle = new Node(
-				this.featureIndex + 1,
-				wineForChildren.middle,
-				2
-			);
-			this.children.right = new Node(
-				this.featureIndex + 1,
-				wineForChildren.right,
-				3
-			);
-		});
-	}
+            wineForChildren[1] = this.wineList.filter(
+                wine => wine[this.decisionIndex] <= currentSplit.lowerBound
+            );
+            wineForChildren[2] = this.wineList.filter(
+                wine =>
+                    wine[this.decisionIndex] > currentSplit.lowerBound &&
+                    wine[this.decisionIndex] <= currentSplit.upperBound
+            );
+            wineForChildren[3] = this.wineList.filter(
+                wine => wine[this.decisionIndex] > currentSplit.upperBound
+            );
 
-	calcEntropy() {
-		const classfiedWines = this.wineList.filter(
-			(wine) => wine[0] === this.classifierID
-		);
+            // Enumerating children with decisions
+            let entropy = 0;
+            for (let i = 1; i <= 3; ++i) {
+                entropy += this.calcWeightedEntropy(wineForChildren[i], i);
+            }
+            this.entropy = Math.min(entropy, this.entropy);
+        });
+    }
 
-		const probability = classfiedWines.length / this.wineList.length;
-		this.entropy = -probability * Math.log2(probability);
-		return this.entropy;
-	}
+    calcWeightedEntropy(childrenWineList, decisionIndex) {
+        const classfiedWines = childrenWineList.filter(
+            wine => wine[0] === decisionIndex
+        );
+
+        const probability = classfiedWines.length / childrenWineList.length;
+
+        if (probability === 0) return Infinity;
+
+        const weightedEntropy =
+            -(childrenWineList.length / this.wineList.length) *
+            probability *
+            Math.log2(probability);
+
+        return weightedEntropy;
+    }
 }
