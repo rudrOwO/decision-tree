@@ -6,7 +6,6 @@ const numberOfFeatures = dataSet[0].length - 1;
 for (let i = 1; i <= numberOfFeatures; ++i)
     featureSet[i] = new Feature(i);
 
-export { featureSet };
-
 const test = new Node(dataSet);
-console.log(test.entropy);
+
+export { featureSet, numberOfFeatures };
