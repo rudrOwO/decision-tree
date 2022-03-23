@@ -9,4 +9,4 @@ for (let i = 1; i <= numberOfFeatures; ++i)
 export { featureSet };
 
 const test = new Node(dataSet);
-console.log(test.calculateEntropy());
+console.log(test.entropy);
