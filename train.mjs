@@ -7,6 +7,7 @@ for (let i = 1; i <= numberOfFeatures; ++i)
     featureSet[i] = new Feature(i);
 
 const test = new Node(dataSet);
-test.makeGreedyDecision()
+test.makeGreedyDecision();
+const c = test.children.left.node;
 
 export { featureSet, numberOfFeatures };

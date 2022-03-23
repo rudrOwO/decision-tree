@@ -27,7 +27,7 @@ export default class Node {
         this.entropy = 0;
 
         for (const classId of this.setOfClassIDs) {
-            let proportion = this.classInstanceCount[classId] / this.dataSet;
+            let proportion = this.classInstanceCount[classId] / this.dataSet.length;
             this.entropy += -proportion * Math.log2(proportion);
         }
 
@@ -64,6 +64,7 @@ export default class Node {
             }
             
             if (entropyOfChildren < minEntropyOfChildren) {
+                this.featureID = selectedFeatureID;
                 minEntropyOfChildren = entropyOfChildren;
                 this.children.left.node = optimumNodes[0];
                 this.children.right.node = optimumNodes[1];
