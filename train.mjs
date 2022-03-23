@@ -1,6 +1,12 @@
-import dataSet from "./data.mjs";
+import { dataSet, Feature } from "./data.mjs";
 import Node from "./node.mjs";
+const featureSet = {};
+const numberOfFeatures = dataSet[0].length - 1;
 
-const test = new Node(1, dataSet, 1);
-test.getOptimumDecision();
-console.log(test.entropy);
+for (let i = 1; i <= numberOfFeatures; ++i)
+    featureSet[i] = new Feature(i);
+
+export { featureSet };
+
+const test = new Node(dataSet);
+console.log(test.calculateEntropy());

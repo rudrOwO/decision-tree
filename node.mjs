@@ -1,81 +1,39 @@
-const maxDepth = 3; // testing features indexed from 1 to limit; breaking condition for recursion
-const splitCount = 5;
-const splitCombinations = [];
-
-// generate nC2 splits
-for (let i = 1; i < splitCount; ++i) {
-    for (let j = i + 1; j < splitCount; ++j) splitCombinations.push([i, j]);
-}
+import { featureSet } from "./train.mjs";
 
 export default class Node {
-    constructor(decisionIndex, wineList, depth) {
-        let featureValue = {
-            min: Infinity,
-            max: -Infinity,
-        };
+    dataSet;  // dataSet local to this Node
+    featureID; // what feature this node uses to split its dataSet
+    classIDs = new Set();  // stored unique IDs of classes of dataSet
+    entropy;
+    children;
+    classInstanceCount = {'1': 0, '2': 0, '3': 0};
+    
+    constructor (dataSet) {
+        this.dataSet = dataSet;
 
-        wineList.forEach(wine => {
-            featureValue.min = Math.min(featureValue.min, wine[decisionIndex]);
-            featureValue.max = Math.max(featureValue.max, wine[decisionIndex]);
-        });
-
-        const unitDistance = (featureValue.max - featureValue.min) / splitCount;
-
-        this.depth = depth;
-        this.wineList = wineList;
-        this.decisionIndex = decisionIndex;
-        this.splits = splitCombinations.map(pair => ({
-            lowerBound: featureValue.min + pair[0] * unitDistance,
-            upperBound: featureValue.min + pair[1] * unitDistance,
-        }));
-        this.children = new Array(4);
+        // Recording class info of each data in dataset
+        for (const [classID] of dataSet) { 
+            this.classIDs.add(classID);
+            this.classInstanceCount[classID] += 1;
+        }
+        
+        // use classIDs.size to determine halting of recursion
     }
+    
+    calculateEntropy () {
+        this.entropy = 0;
 
-    getOptimumDecision() {
-        // Breaking condition
-        if (this.depth === maxDepth) return this.calcWeightedEntropy();
+        for (const id of this.classIDs) {
+            let proportion = this.classInstanceCount[id] / this.dataSet.length;
+            this.entropy += -proportion * Math.log2(proportion);
+        }
 
-        this.entropy = Infinity;
-
-        // Iterating through the splits
-        this.splits.forEach(currentSplit => {
-            const wineForChildren = new Array(4);
-
-            wineForChildren[1] = this.wineList.filter(
-                wine => wine[this.decisionIndex] <= currentSplit.lowerBound
-            );
-            wineForChildren[2] = this.wineList.filter(
-                wine =>
-                    wine[this.decisionIndex] > currentSplit.lowerBound &&
-                    wine[this.decisionIndex] <= currentSplit.upperBound
-            );
-            wineForChildren[3] = this.wineList.filter(
-                wine => wine[this.decisionIndex] > currentSplit.upperBound
-            );
-
-            // Enumerating children with decisions
-            let entropy = 0;
-            for (let i = 1; i <= 3; ++i) {
-                entropy += this.calcWeightedEntropy(wineForChildren[i], i);
-            }
-            this.entropy = Math.min(entropy, this.entropy);
-        });
+        return this.entropy;
     }
-
-    calcWeightedEntropy(childrenWineList, decisionIndex) {
-        const classfiedWines = childrenWineList.filter(
-            wine => wine[0] === decisionIndex
-        );
-
-        const probability = classfiedWines.length / childrenWineList.length;
-
-        if (probability === 0) return Infinity;
-
-        const weightedEntropy =
-            -(childrenWineList.length / this.wineList.length) *
-            probability *
-            Math.log2(probability);
-
-        return weightedEntropy;
+    
+    generateOptimumSplit () {
+       let minEntropyOfChildren = Infinity; 
+        
+       
     }
 }
