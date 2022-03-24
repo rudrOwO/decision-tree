@@ -179,23 +179,18 @@ const dataSet = [
 [3,14.13,4.1,2.74,24.5,96,2.05,.76,.56,1.35,9.2,.61,1.6,560]
 ];
 
-class Feature {
-    id;
-    mid;
-    
-    constructor (id) {
-        this.id = id;
-        
-        let min = Infinity;
-        let max = -Infinity;
-        
-        for (const data of dataSet) {
-            min = Math.min(min, data[id]);
-            max = Math.max(max, data[id]);
-        }
-        
-        this.mid = (max + min) / 2;
-    }
-}
+const numberOfFeatures = dataSet[0].length - 1;
 
-export {dataSet, Feature};
+const calcDataMid = (id, dataSet) => {
+    let min = Infinity;
+    let max = -Infinity;
+    
+    for (const data of dataSet) {
+        min = Math.min(min, data[id]);
+        max = Math.max(max, data[id]);
+    }
+    
+    return (max + min) / 2;
+};
+
+export { dataSet, calcDataMid, numberOfFeatures };

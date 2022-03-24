@@ -1,8 +1,8 @@
-import { featureSet, numberOfFeatures } from "./train.mjs";
+import { calcDataMid, numberOfFeatures } from "./data.mjs";
 
 export default class Node {
     dataSet;  // dataSet local to this Node
-    children;
+    children = {left: {}, right: {}};
     featureID; // what feature this node uses to split its dataSet
     setOfClassIDs = new Set();  // stored unique IDs of classes of dataSet
     entropy;
@@ -10,7 +10,6 @@ export default class Node {
     
     constructor (passedDataSet) {
         this.dataSet = passedDataSet;
-        this.children = {left: {}, right: {}};
         this.recordClassInfo();
         this.calculateEntropy();
     }
@@ -37,16 +36,22 @@ export default class Node {
     splitDataSet (selectedFeatureID) {
         this.children.left.dataSet = [];
         this.children.right.dataSet = [];
+        const dataMid = calcDataMid(selectedFeatureID, this.dataSet);
         
         for (const data of this.dataSet) {
-            if (data[selectedFeatureID] < featureSet[selectedFeatureID].mid)
+            if (data[selectedFeatureID] < dataMid)
                 this.children.left.dataSet.push(data);
             else 
                 this.children.right.dataSet.push(data);
         }
     }
     
-    makeGreedyDecision () {
+    makeGreedyDecision () {  // This method is responsible for generating new nodes
+        if (this.setOfClassIDs.size === 1) {
+            console.log('Tree terminated');
+            return null;
+        } 
+        
         let minEntropyOfChildren = Infinity; 
         let optimumNodes;
 
@@ -59,7 +64,6 @@ export default class Node {
                 let proportion =  (child.dataSet.length / this.dataSet.length);
                 let candidateNode = new Node(child.dataSet);
                 entropyOfChildren += proportion * (candidateNode.entropy);
-
                 optimumNodes.push(candidateNode);
             }
             
