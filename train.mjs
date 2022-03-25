@@ -1,31 +1,21 @@
 import { dataSet } from "./data.mjs";
 import Node from "./node.mjs";
+import Queue from "./queue.mjs";
 
-const test = new Node(dataSet);
-test.makeGreedyDecision();
+const root = new Node(dataSet);
+const queue = new Queue();
 
-const c = test.children.left.node;
-const d = test.children.right.node;
+// Breadth-first tree construction
+queue.enqueue(root);
 
-// console.log(c.entropy)
-// console.log(d.entropy)
+while (!queue.isEmpty()) {
+  let frontNode = queue.deque();
+  frontNode.makeGreedyDecision();
+  console.log(frontNode.featureID);
 
-c.makeGreedyDecision();
-
-const cc = c.children.left.node; 
-const dd = c.children.right.node; 
-
-// console.log(cc.dataSet.length, dd.dataSet.length)
-// console.log(cc.entropy, dd.entropy)
-
-dd.makeGreedyDecision();
-const ddd = dd.children.left.node;
-// console.log(ddd.entropy)
-
-ddd.makeGreedyDecision()
-
-const cccc = ddd.children.left.node; 
-const dddd = ddd.children.right.node; 
-
-console.log(cccc.dataSet.length, dddd.dataSet.length);
-console.log(cccc.entropy, dddd.entropy);
+  for (const [, child] of Object.entries(frontNode.children)) {
+    if (child.node !== undefined) {
+      queue.enqueue(child.node);
+    }
+  }
+}
