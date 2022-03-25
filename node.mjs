@@ -1,15 +1,17 @@
 import { calcDataMid, numberOfFeatures } from "./data.mjs";
 
 export default class Node {
+  depth;
   dataSet; // dataSet local to this Node
   children = { left: {}, right: {} };
-  featureID; // what feature this node uses to split its dataSet
+  featureID = "x"; // what feature this node uses to split its dataSet
   setOfClassIDs = new Set(); // stored unique IDs of classes of dataSet
   entropy;
   classInstanceCount = { 1: 0, 2: 0, 3: 0 };
 
-  constructor(passedDataSet) {
+  constructor(passedDataSet, depth) {
     this.dataSet = passedDataSet;
+    this.depth = depth;
     this.recordClassInfo();
     this.calculateEntropy();
   }
@@ -64,7 +66,7 @@ export default class Node {
       // calculating weighted entropy of children for a particular feature ID
       for (const [, child] of Object.entries(this.children)) {
         let proportion = child.dataSet.length / this.dataSet.length;
-        let candidateNode = new Node(child.dataSet);
+        let candidateNode = new Node(child.dataSet, this.depth + 1);
         entropyOfChildren += proportion * candidateNode.entropy;
         optimumNodes.push(candidateNode);
       }

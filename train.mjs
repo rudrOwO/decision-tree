@@ -2,8 +2,11 @@ import { dataSet } from "./data.mjs";
 import Node from "./node.mjs";
 import Queue from "./queue.mjs";
 
-const root = new Node(dataSet);
+const root = new Node(dataSet, 0);
 const queue = new Queue();
+
+const display = [];
+for (let i = 1; i < 13; ++i) display.push([]);
 
 // Breadth-first tree construction
 queue.enqueue(root);
@@ -11,7 +14,8 @@ queue.enqueue(root);
 while (!queue.isEmpty()) {
   let frontNode = queue.deque();
   frontNode.makeGreedyDecision();
-  console.log(frontNode.featureID);
+
+  display[frontNode.depth].push(frontNode.featureID);
 
   for (const [, child] of Object.entries(frontNode.children)) {
     if (child.node !== undefined) {
@@ -19,3 +23,5 @@ while (!queue.isEmpty()) {
     }
   }
 }
+
+for (const line of display) console.log(line);
