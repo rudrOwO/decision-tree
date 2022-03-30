@@ -9,6 +9,7 @@ export default class Node {
     mid: null
   }
   setOfClassIDs = new Set(); // stored unique IDs of classes of dataSet
+  assignedClass = null;
   entropy;
   classInstanceCount = { 1: 0, 2: 0, 3: 0 };
 
@@ -41,18 +42,37 @@ export default class Node {
   splitDataSet(selectedFeatureID) {
     this.children.left.dataSet = [];
     this.children.right.dataSet = [];
-    this.feature.mid = calcDataMid(selectedFeatureID, this.dataSet);
+    const dataMid = calcDataMid(selectedFeatureID, this.dataSet);
 
     for (const data of this.dataSet) {
-      if (data[selectedFeatureID] < this.feature.mid)
+      if (data[selectedFeatureID] < dataMid)
         this.children.left.dataSet.push(data);
       else this.children.right.dataSet.push(data);
     }
+    
+    return dataMid;
+  }
+  
+  classify (data) {
+    if (this.assignedClass !== null)
+      return this.assignedClass;
+    
+    if(data[this.feature.id] < this.feature.mid)
+      return this.children.left.node.classify(data)
+    else
+      return this.children.right.node.classify(data)
   }
 
+  // This method is responsible for generating new nodes
   makeGreedyDecision() {
-    // This method is responsible for generating new nodes
-    if (this.setOfClassIDs.size === 1) return;
+    // Assign class and break recursion
+    if (this.setOfClassIDs.size === 1) {
+      for (const classID in this.classInstanceCount) {
+        if (this.classInstanceCount[classID] > 0)
+          this.assignedClass = classID;
+      }
+      return;
+    }
 
     let minEntropyOfChildren = Infinity;
     let optimumNodes;
@@ -62,21 +82,22 @@ export default class Node {
       selectedFeatureID <= numberOfFeatures;
       ++selectedFeatureID
     ) {
-      let entropyOfChildren = 0;
-      this.splitDataSet(selectedFeatureID);
+      let weightedEntropyOfChildren = 0;
+      const dataMid = this.splitDataSet(selectedFeatureID);
       optimumNodes = [];
 
       // calculating weighted entropy of children for a particular feature ID
       for (const [, child] of Object.entries(this.children)) {
         let proportion = child.dataSet.length / this.dataSet.length;
         let candidateNode = new Node(child.dataSet, this.depth + 1);
-        entropyOfChildren += proportion * candidateNode.entropy;
+        weightedEntropyOfChildren += proportion * candidateNode.entropy;
         optimumNodes.push(candidateNode);
       }
 
-      if (entropyOfChildren < minEntropyOfChildren) {
+      if (weightedEntropyOfChildren < minEntropyOfChildren) {
         this.feature.id = selectedFeatureID;
-        minEntropyOfChildren = entropyOfChildren;
+        this.feature.mid = dataMid;
+        minEntropyOfChildren = weightedEntropyOfChildren;
         this.children.left.node = optimumNodes[0];
         this.children.right.node = optimumNodes[1];
       }
