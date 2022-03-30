@@ -2,7 +2,16 @@ import { dataSet } from "./data.mjs";
 import Node from "./node.mjs";
 import Queue from "./queue.mjs";
 
-const root = new Node(dataSet, 0);
+// Choose Test Set | 80% choice rate at random
+const trainingSet = [];
+const testingSet = [];
+
+for (const data of dataSet) {
+  if (Math.random() < 0.75) trainingSet.push(data);
+  else testingSet.push(data);
+}
+
+const root = new Node(trainingSet, 0);
 const queue = new Queue();
 
 const displayer = [];
@@ -26,4 +35,4 @@ function train () {
   }
 }
 
-export {train, root, displayer}
+export {train, root, displayer, testingSet}
