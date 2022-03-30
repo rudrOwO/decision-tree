@@ -4,7 +4,10 @@ export default class Node {
   depth;
   dataSet; // dataSet local to this Node
   children = { left: {}, right: {} };
-  featureID = "x"; // what feature this node uses to split its dataSet
+  feature = {
+    id: 'x',
+    mid: null
+  }
   setOfClassIDs = new Set(); // stored unique IDs of classes of dataSet
   entropy;
   classInstanceCount = { 1: 0, 2: 0, 3: 0 };
@@ -38,10 +41,10 @@ export default class Node {
   splitDataSet(selectedFeatureID) {
     this.children.left.dataSet = [];
     this.children.right.dataSet = [];
-    const dataMid = calcDataMid(selectedFeatureID, this.dataSet);
+    this.feature.mid = calcDataMid(selectedFeatureID, this.dataSet);
 
     for (const data of this.dataSet) {
-      if (data[selectedFeatureID] < dataMid)
+      if (data[selectedFeatureID] < this.feature.mid)
         this.children.left.dataSet.push(data);
       else this.children.right.dataSet.push(data);
     }
@@ -72,7 +75,7 @@ export default class Node {
       }
 
       if (entropyOfChildren < minEntropyOfChildren) {
-        this.featureID = selectedFeatureID;
+        this.feature.id = selectedFeatureID;
         minEntropyOfChildren = entropyOfChildren;
         this.children.left.node = optimumNodes[0];
         this.children.right.node = optimumNodes[1];

@@ -8,14 +8,14 @@ const queue = new Queue();
 const display = [];
 for (let i = 1; i < 13; ++i) display.push([]);
 
-// Breadth-first tree construction
+// BFS Tree Traversal
 queue.enqueue(root);
 
 while (!queue.isEmpty()) {
   let frontNode = queue.deque();
   frontNode.makeGreedyDecision();
 
-  display[frontNode.depth].push(frontNode.featureID);
+  display[frontNode.depth].push(frontNode.feature.mid);
 
   for (const [, child] of Object.entries(frontNode.children)) {
     if (child.node !== undefined) {
